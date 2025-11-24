@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from constants import ROOMS
-from utils import describe_current_room, solve_puzzle, show_help
+from utils import describe_current_room, solve_puzzle, show_help, pseudo_random, trigger_trap
 from player_actions import move_player, show_inventory, take_item, get_input, use_item
 
 game_state = {

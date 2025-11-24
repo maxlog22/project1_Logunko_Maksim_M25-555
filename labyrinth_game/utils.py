@@ -1,4 +1,5 @@
 from constants import ROOMS
+import math
 
 def describe_current_room(game_state):
     # Получаем текущую комнату из game_state
@@ -105,7 +106,6 @@ def attempt_open_treasure(game_state):
     else:
         print("Вы отступаете от сундука.")
 
-
 def show_help():
     print("\nДоступные команды:")
     print("  go <direction>  - перейти в направлении (north/south/east/west)")
@@ -116,3 +116,72 @@ def show_help():
     print("  solve           - попытаться решить загадку в комнате")
     print("  quit            - выйти из игры")
     print("  help            - показать это сообщение")
+
+def pseudo_random(seed, modulo):
+    '''Добавляем случайности в путешествии'''
+    sin_value = math.sin(seed * 12.9898)
+    multiplied = sin_value * 43758.5453
+    fractional_part = multiplied - math.floor(multiplied)
+    result = math.floor(fractional_part * modulo)
+    return result
+
+def trigger_trap(game_state):
+    '''Добавляем ловушки в игровую логику'''
+    print("Ловушка активирована! Пол стал дрожать...")
+    
+    player_inventory = game_state['player_inventory']
+    
+    # Проверяем, есть ли предметы в инвентаре
+    if player_inventory:
+        # Выбираем случайный предмет для удаления
+        items_count = len(player_inventory)
+        random_index = pseudo_random(game_state['steps_taken'], items_count)
+        lost_item = player_inventory.pop(random_index)
+        print(f"Из-за тряски вы потеряли: {lost_item}!")
+    else:
+        # Инвентарь пуст - игрок получает урон
+        damage_chance = pseudo_random(game_state['steps_taken'], 10)
+
+        if damage_chance < 3:
+            print("Сильный толчок сбивает вас с ног! Вы ударяетесь головой о камень...")
+            print("ВСЁ ПРОПАЛО! Игра окончена.")
+            game_state['game_over'] = True
+        else:
+            print("Вам удается удержаться на ногах! Вы чудом избежали травмы.")
+
+def random_event(game_state):
+    '''Добавляем случайчности во время перемещения игрока'''
+    # Проверяем, происходит ли событие (10% вероятность)
+    if pseudo_random() % 10 == 0:
+        # Выбираем тип события
+        event_type = pseudo_random() % 3
+        
+        if event_type == 0:
+            # Сценарий 1: Находка
+            print("Вы заметили что-то блестящее на полу... Это монетка!")
+            current_room = game_state['current_room']
+            if 'items' not in game_state['rooms'][current_room]:
+                game_state['rooms'][current_room]['items'] = []
+            game_state['rooms'][current_room]['items'].append('coin')
+            return True
+            
+        elif event_type == 1:
+            # Сценарий 2: Испуг
+            print("Вы слышите странный шорох из темноты...")
+            if 'sword' in game_state['inventory']:
+                print("Благодаря мечу в вашей руке, существо решает не нападать и отступает.")
+            else:
+                print("Вам становится не по себе... лучше бы у вас было оружие.")
+            return True
+            
+        elif event_type == 2:
+            # Сценарий 3: Срабатывание ловушки
+            current_room = game_state['current_room']
+            if current_room == 'trap_room' and 'torch' not in game_state['inventory']:
+                print("Вы слышите щелчок под ногой! Это ловушка!")
+                trigger_trap(game_state)
+                return True
+            else:
+                return False
+    
+    return False

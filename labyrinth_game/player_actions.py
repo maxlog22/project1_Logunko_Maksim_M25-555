@@ -36,6 +36,8 @@ def move_player(game_state, direction):
             # Выводим описание новой комнаты (импортируем здесь чтобы избежать циклического импорта)
             from utils import describe_current_room
             describe_current_room(game_state)
+            from utils import random_event
+            random_event(game_state)
         else:
             print("Нельзя пойти в этом направлении.")
     else:
