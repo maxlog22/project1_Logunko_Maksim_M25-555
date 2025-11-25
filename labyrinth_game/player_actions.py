@@ -29,19 +29,39 @@ def move_player(game_state, direction):
         next_room = ROOMS[cur_room]['exits'][direction]
         
         if next_room != '':
-            # Обновляем текущую комнату
-            game_state["current_room"] = next_room
-            # Увеличиваем шаг на единицу
-            game_state['steps_taken'] += 1
-            # Выводим описание новой комнаты (импортируем здесь чтобы избежать циклического импорта)
-            from utils import describe_current_room
-            describe_current_room(game_state)
-            from utils import random_event
-            random_event(game_state)
+            # Проверяем, является ли следующая комната treasure_room
+            if next_room == 'treasure_room':
+                # Проверяем наличие ключа в инвентаре
+                if 'rusty_key' in game_state['inventory']:
+                    print("Вы используете найденный ключ, чтобы открыть путь в комнату сокровищ.")
+                    # Обновляем текущую комнату
+                    game_state["current_room"] = next_room
+                    # Увеличиваем шаг на единицу
+                    game_state['steps_taken'] += 1
+                    # Выводим описание новой комнаты
+                    from utils import describe_current_room
+                    describe_current_room(game_state)
+                    from utils import random_event
+                    random_event(game_state)
+                else:
+                    print("Дверь заперта. Нужен ключ, чтобы пройти дальше.")
+                    return False
+            else:
+                # Для всех других комнат - обычное перемещение
+                game_state["current_room"] = next_room
+                game_state['steps_taken'] += 1
+                from utils import describe_current_room
+                describe_current_room(game_state)
+                from utils import random_event
+                random_event(game_state)
         else:
             print("Нельзя пойти в этом направлении.")
+            return False
     else:
         print("Нельзя пойти в этом направлении.")
+        return False
+    
+    return True
 
 def take_item(game_state, item_name):
     cur_room = game_state['current_room']
@@ -76,3 +96,6 @@ def use_item(game_state, item_name):
                 print("Вы получили: rusty_key")
             else:
                 print("Шкатулка пуста.")
+        case _:
+            # Для всех остальных предметов
+            print(f"Вы не знаете, как использовать {item_name}.")

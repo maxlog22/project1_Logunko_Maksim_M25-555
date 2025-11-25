@@ -46,6 +46,13 @@ def solve_puzzle(game_state):
     from player_actions import get_input
     user_answer = get_input("Ваш ответ: ").strip()
     
+    # Создаем список допустимых ответов (включая альтернативные варианты)
+    valid_answers = [correct_answer.lower()]
+    
+    # Добавляем альтернативные варианты для числовых ответов
+    if correct_answer == "10":
+        valid_answers.extend(["десять", "10", "ten"])
+
     # Сравниваем ответ пользователя с правильным
     if user_answer.lower() == correct_answer.lower():
         print("Правильно! Загадка решена!")
@@ -53,6 +60,15 @@ def solve_puzzle(game_state):
         # Убираем загадку из комнаты
         room["puzzle"] = None
         
+        # Награда зависит от комнаты
+        rewards = {
+            "hall": "torch",
+            "trap_room": "sword", 
+            "library": "skeleton_key",
+            "garden": "bronze box",
+            "dungeon": "treasure_key"
+        }
+
         # Добавляем награду игроку (можно настроить для каждой комнаты)
         reward = f"награда_за_{current_room_id}"
         game_state['player_inventory'].append(reward)
@@ -60,6 +76,10 @@ def solve_puzzle(game_state):
         
     else:
         print("Неверно. Попробуйте снова.")
+        if current_room_id == "trap_room":
+            print("Ловушка активирована)")
+            trigger_trap(game_state)
+
 
 def attempt_open_treasure(game_state):
     """Попытка открыть сундук с сокровищами"""
@@ -106,16 +126,11 @@ def attempt_open_treasure(game_state):
     else:
         print("Вы отступаете от сундука.")
 
-def show_help():
+def show_help(commands):
     print("\nДоступные команды:")
-    print("  go <direction>  - перейти в направлении (north/south/east/west)")
-    print("  look            - осмотреть текущую комнату")
-    print("  take <item>     - поднять предмет")
-    print("  use <item>      - использовать предмет из инвентаря")
-    print("  inventory       - показать инвентарь")
-    print("  solve           - попытаться решить загадку в комнате")
-    print("  quit            - выйти из игры")
-    print("  help            - показать это сообщение")
+    for cmd, desc in commands.items():
+        # Форматируем вывод: команда занимает 16 символов с выравниванием по левому краю
+        print(f"  {cmd:<16} - {desc}")
 
 def pseudo_random(seed, modulo):
     '''Добавляем случайности в путешествии'''

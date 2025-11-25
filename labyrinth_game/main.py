@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from constants import ROOMS
-from utils import describe_current_room, solve_puzzle, show_help, pseudo_random, trigger_trap
+from constants import COMMANDS
+from utils import describe_current_room, solve_puzzle, show_help
 from player_actions import move_player, show_inventory, take_item, get_input, use_item
 
 game_state = {
@@ -20,6 +20,7 @@ def process_command(game_state, command):
     main_command = parts[0]
     argument = parts[1] if len(parts) > 1 else None
     
+    directions = {"north", "south", "east", "west", "up", "down"} 
     # Обрабатываем команды с помощью match/case
     match main_command:
         case "look":
@@ -27,13 +28,7 @@ def process_command(game_state, command):
             
         case "inventory":
             show_inventory(game_state)
-            
-        case "go":
-            if argument:
-                move_player(game_state, argument)
-            else:
-                print("Укажите направление. Например: 'go north'")
-                
+                          
         case "take":
             if argument:
                 take_item(game_state, argument)
@@ -41,7 +36,11 @@ def process_command(game_state, command):
                 print("Укажите название предмета. Например: 'take torch'")
         
         case "solve":
-            solve_puzzle(game_state)
+            if game_state["current_room"] == "treasure_room":
+                from utils import attempt_open_treasure
+                attempt_open_treasure(game_state)
+            else:
+                solve_puzzle(game_state)
             
         case "use":  # ДОБАВЛЕН КЕЙС ДЛЯ КОМАНДЫ use
             if argument:
@@ -54,7 +53,13 @@ def process_command(game_state, command):
             game_state['game_over'] = True
        
         case "help":
-            show_help()
+            show_help(COMMANDS)
+
+        case c if c in directions:
+            # Если ввод только одно слово-направление
+            move_player(game_state, c)
+        case _:
+            print("Неизвестная команда. Введите 'help' для списка команд.")
 
         
 def main():
