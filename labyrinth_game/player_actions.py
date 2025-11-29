@@ -1,7 +1,8 @@
 from constants import ROOMS
 
+
 def show_inventory(game_state):
-    # Получаем инвентарь игрока
+    ''' Выводим инвентарь игрока '''
     player_inventory = game_state["player_inventory"]
 
     # Проверяем, пуст ли инвентарь
@@ -14,6 +15,7 @@ def show_inventory(game_state):
 
 
 def get_input(prompt="> "):
+    ''' Ввод пользователя '''
     try:
         user_input = input(prompt).strip()
         return user_input
@@ -22,6 +24,7 @@ def get_input(prompt="> "):
         return "quit"
 
 def move_player(game_state, direction):
+    ''' Функция перемещения '''
     cur_room = game_state["current_room"]
     
     # Проверяем, существует ли выход в этом направлении
@@ -33,7 +36,7 @@ def move_player(game_state, direction):
             if next_room == 'treasure_room':
                 # Проверяем наличие ключа в инвентаре
                 if 'rusty_key' in game_state['inventory']:
-                    print("Вы используете найденный ключ, чтобы открыть путь в комнату сокровищ.")
+                    print("Вы используете найденный ключ, чтобы открыть путь в комнату сокровищ.") # noqa: E501
                     # Обновляем текущую комнату
                     game_state["current_room"] = next_room
                     # Увеличиваем шаг на единицу
@@ -64,6 +67,7 @@ def move_player(game_state, direction):
     return True
 
 def take_item(game_state, item_name):
+    ''' Функция взятия предмета '''
     cur_room = game_state['current_room']
 
     if item_name in ROOMS[cur_room]["items"]:
@@ -74,7 +78,7 @@ def take_item(game_state, item_name):
         print("Такого предмета здесь нет.")
 
 def use_item(game_state, item_name):
-    """Использование предмета из инвентаря"""
+    ''' Использование предмета из инвентаря '''
     # Проверяем, есть ли предмет у игрока
     if item_name not in game_state['player_inventory']:
         print("У вас нет такого предмета.")

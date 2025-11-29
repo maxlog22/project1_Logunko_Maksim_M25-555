@@ -1,34 +1,37 @@
-from constants import ROOMS
 import math
 
+from constants import ROOMS
+
+''' Фунция описания комнаты '''
 def describe_current_room(game_state):
     # Получаем текущую комнату из game_state
-    current_room_id = game_state["current_room"]
-    room = ROOMS[current_room_id]
+    current_room = game_state["current_room"]
+    room = ROOMS[current_room]
 
-    # Название комнаты в верхнем регистре
-    print(f"== {current_room_id.upper()} ==")
+    # Выводим название комнаты
+    print(f">> {current_room.upper()} <<")
 
-    # Описание комнаты
+    # Выводим описание комнаты
     print(room["description"])
 
-    # Список видимых предметов
+    # Выводим список видимых предметов
     if room.get("items"):
         print("Заметные предметы:", ", ".join(room["items"]))
 
-    # Доступные выходы
+    # Выводим доступные выходы
     exits = room.get("exits", {})
     if exits:
         print("Выходы:", ", ".join(exits.keys()))
 
-    # Сообщение о наличии загадки
+    # Выводим сообщение о наличии загадки
     if room.get("puzzle"):
         print("Кажется, здесь есть загадка (используйте команду solve).")
 
+
 def solve_puzzle(game_state):
-    """Функция решения загадок в текущей комнате"""
-    current_room_id = game_state["current_room"]
-    room = ROOMS[current_room_id]
+    ''' Функция решения загадок '''
+    current_room = game_state["current_room"]
+    room = ROOMS[current_room]
     
     # Проверяем, есть ли загадка в текущей комнате
     if not room.get("puzzle"):
@@ -39,14 +42,14 @@ def solve_puzzle(game_state):
     puzzle_question, correct_answer = room["puzzle"]
     
     # Выводим вопрос загадки
-    print("\n=== ЗАГАДКА ===")
+    print("\n>> ЗАГАДКА <<")
     print(puzzle_question)
     
     # Получаем ответ от пользователя
     from player_actions import get_input
     user_answer = get_input("Ваш ответ: ").strip()
     
-    # Создаем список допустимых ответов (включая альтернативные варианты)
+    # Создаем список допустимых/альтернативных ответов
     valid_answers = [correct_answer.lower()]
     
     # Добавляем альтернативные варианты для числовых ответов
@@ -69,22 +72,22 @@ def solve_puzzle(game_state):
             "dungeon": "treasure_key"
         }
 
-        # Добавляем награду игроку (можно настроить для каждой комнаты)
-        reward = f"награда_за_{current_room_id}"
+        # Добавляем награду игроку
+        reward = rewards.get(current_room, f"награда_за_{current_room}")
         game_state['player_inventory'].append(reward)
         print(f"Вы получили: {reward}")
         
     else:
         print("Неверно. Попробуйте снова.")
-        if current_room_id == "trap_room":
+        if current_room == "trap_room":
             print("Ловушка активирована)")
             trigger_trap(game_state)
 
 
 def attempt_open_treasure(game_state):
-    """Попытка открыть сундук с сокровищами"""
-    current_room_id = game_state["current_room"]
-    room = ROOMS[current_room_id]
+    ''' Реализация логики победы '''
+    current_room = game_state["current_room"]
+    room = ROOMS[current_room]
     
     # Проверка ключа
     if "treasure_key" in game_state['player_inventory']:
@@ -100,7 +103,7 @@ def attempt_open_treasure(game_state):
         return
     
     # Если ключа нет, предлагаем ввести код
-    print("Сундук заперт. Без ключа открыть его будет сложно, но можно попробовать взломать код.")
+    print("Сундук заперт. Без ключа открыть его будет сложно, но можно попробовать взломать код.") # noqa: E501
     from player_actions import get_input
     answer = get_input("Ввести код? (да/нет): ").strip().lower()
     
@@ -127,13 +130,14 @@ def attempt_open_treasure(game_state):
         print("Вы отступаете от сундука.")
 
 def show_help(commands):
+    ''' Функция помощи '''
     print("\nДоступные команды:")
     for cmd, desc in commands.items():
-        # Форматируем вывод: команда занимает 16 символов с выравниванием по левому краю
+        # Форматируем вывод
         print(f"  {cmd:<16} - {desc}")
 
 def pseudo_random(seed, modulo):
-    '''Добавляем случайности в путешествии'''
+    ''' Добавляем случайности в игровой процесс '''
     sin_value = math.sin(seed * 12.9898)
     multiplied = sin_value * 43758.5453
     fractional_part = multiplied - math.floor(multiplied)
@@ -141,7 +145,7 @@ def pseudo_random(seed, modulo):
     return result
 
 def trigger_trap(game_state):
-    '''Добавляем ловушки в игровую логику'''
+    ''' Добавляем ловушки в игровую логику '''
     print("Ловушка активирована! Пол стал дрожать...")
     
     player_inventory = game_state['player_inventory']
@@ -165,7 +169,7 @@ def trigger_trap(game_state):
             print("Вам удается удержаться на ногах! Вы чудом избежали травмы.")
 
 def random_event(game_state):
-    '''Добавляем случайчности во время перемещения игрока'''
+    ''' Добавляем случайности во время перемещения игрока '''
     # Проверяем, происходит ли событие (10% вероятность)
     if pseudo_random() % 10 == 0:
         # Выбираем тип события
@@ -184,7 +188,7 @@ def random_event(game_state):
             # Сценарий 2: Испуг
             print("Вы слышите странный шорох из темноты...")
             if 'sword' in game_state['inventory']:
-                print("Благодаря мечу в вашей руке, существо решает не нападать и отступает.")
+                print("Благодаря мечу в вашей руке, существо решает не нападать и отступает.") # noqa: E501
             else:
                 print("Вам становится не по себе... лучше бы у вас было оружие.")
             return True
