@@ -8,7 +8,7 @@ ROOMS = {
     },
     "hall": {
         "description": "Большой зал с эхом. По центру стоит пьедестал с запечатанным сундуком.", # noqa: E501
-        "exits": {"south": "entrance", "west": "library", "north": "treasure_room"},
+        "exits": {"south": "entrance", "west": "library", "north": "treasure_room", "down": "dungeon"},  # noqa: E501
         "items": [],
         "puzzle": (
             'На пьедестале надпись: "Назовите число, которое идет после девяти". Введите ответ цифрой или словом.', # noqa: E501
@@ -70,7 +70,7 @@ ROOMS = {
 
 '''Заносим игровые действия'''
 COMMANDS = {
-    "go <direction>": "перейти в направлении (north/south/east/west)",
+    "go <direction>": "перейти в направлении (north/south/east/west/up/down)",
     "look": "осмотреть текущую комнату",
     "take <item>": "поднять предмет",
     "use <item>": "использовать предмет из инвентаря",

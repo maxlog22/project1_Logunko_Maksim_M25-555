@@ -74,8 +74,12 @@ def solve_puzzle(game_state):
 
         # Добавляем награду игроку
         reward = rewards.get(current_room, f"награда_за_{current_room}")
-        game_state['player_inventory'].append(reward)
-        print(f"Вы получили: {reward}")
+        
+        if reward in game_state['player_inventory']:
+            print(f"У вас уже есть {reward}!")
+        else:
+            game_state['player_inventory'].append(reward)
+            print(f"Вы получили: {reward}")
         
     else:
         print("Неверно. Попробуйте снова.")
@@ -94,7 +98,7 @@ def attempt_open_treasure(game_state):
         print("Вы применяете ключ, и замок щёлкает. Сундук открыт!")
         
         # Удаляем сундук из предметов комнаты
-        if "treasure_chest" in room["items"]:
+        if "treasure_chest" in room.get("items", []):
             room["items"].remove("treasure_chest")
         
         # Сообщаем о победе
@@ -104,6 +108,7 @@ def attempt_open_treasure(game_state):
     
     # Если ключа нет, предлагаем ввести код
     print("Сундук заперт. Без ключа открыть его будет сложно, но можно попробовать взломать код.") # noqa: E501
+    
     from player_actions import get_input
     answer = get_input("Ввести код? (да/нет): ").strip().lower()
     
@@ -117,7 +122,7 @@ def attempt_open_treasure(game_state):
                 print("Код принят! Сундук открывается!")
                 
                 # Удаляем сундук из предметов комнаты
-                if "treasure_chest" in room["items"]:
+                if "treasure_chest" in room.get("items", []):
                     room["items"].remove("treasure_chest")
                 
                 print("В сундуке сокровище! Вы победили!")
@@ -171,17 +176,17 @@ def trigger_trap(game_state):
 def random_event(game_state):
     ''' Добавляем случайности во время перемещения игрока '''
     # Проверяем, происходит ли событие (10% вероятность)
-    if pseudo_random() % 10 == 0:
+    if pseudo_random(game_state['steps_taken'], 10) == 0:
         # Выбираем тип события
-        event_type = pseudo_random() % 3
+        event_type = pseudo_random(game_state['steps_taken'], 3)
         
         if event_type == 0:
             # Сценарий 1: Находка
             print("Вы заметили что-то блестящее на полу... Это монетка!")
             current_room = game_state['current_room']
-            if 'items' not in game_state['rooms'][current_room]:
-                game_state['rooms'][current_room]['items'] = []
-            game_state['rooms'][current_room]['items'].append('coin')
+            if 'items' not in ROOMS[current_room]:
+                ROOMS[current_room]['items'] = []
+            ROOMS[current_room]['items'].append('coin')
             return True
             
         elif event_type == 1:

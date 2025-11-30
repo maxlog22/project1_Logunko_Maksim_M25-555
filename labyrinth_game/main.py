@@ -75,4 +75,6 @@ def main():
     while not game_state['game_over']:
         command = get_input("\nВведите команду: ")
         process_command(game_state, command)
-main()
+
+if __name__ == "__main__":
+    main()
